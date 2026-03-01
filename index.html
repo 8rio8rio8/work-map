@@ -10,205 +10,128 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root {
-    --bg: #f0f2f7;
-    --surface: #ffffff;
-    --surface2: #f5f7fb;
-    --accent: #3a7ef5;
-    --accent2: #d4891a;
-    --accent3: #27ae72;
-    --text: #1a1d2e;
-    --text-muted: #7a7f96;
-    --border: #dde1f0;
-    --danger: #e53935;
-    --admin: #d4891a;
+    --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
+    --accent:#3a7ef5; --accent2:#d4891a; --accent3:#27ae72;
+    --text:#1a1d2e; --text-muted:#7a7f96; --border:#dde1f0;
+    --danger:#e53935; --admin:#d4891a;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
-  /* ── 入場パスワード画面 ── */
-  #entryScreen {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .entry-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px;
-    width: 360px;
-    max-width: 90vw;
-    text-align: center;
-    animation: slideUp 0.3s ease;
-  }
-  .entry-logo {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .entry-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  .entry-subtitle {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 28px;
-    line-height: 1.6;
-  }
-  .entry-icon {
-    font-size: 48px;
-    margin-bottom: 20px;
-    display: block;
-  }
-  .pw-input-wrap { position: relative; margin-bottom: 8px; }
-  .pw-input-wrap input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 40px 12px 16px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 15px;
-    letter-spacing: 0.15em;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .pw-input-wrap input:focus { border-color: var(--accent); }
-  .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; }
-  .entry-error { font-size: 12px; color: var(--danger); min-height: 18px; margin-bottom: 12px; }
-  .entry-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .entry-btn:hover { opacity: 0.85; }
+  #entryScreen { position:fixed; inset:0; background:var(--bg); z-index:99999; display:flex; align-items:center; justify-content:center; }
+  .entry-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:40px; width:360px; max-width:90vw; text-align:center; animation:slideUp 0.3s ease; }
+  .entry-logo { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; letter-spacing:0.15em; color:var(--accent); text-transform:uppercase; margin-bottom:8px; }
+  .entry-title { font-size:18px; font-weight:700; margin-bottom:6px; }
+  .entry-subtitle { font-size:12px; color:var(--text-muted); margin-bottom:28px; line-height:1.6; }
+  .entry-icon { font-size:48px; margin-bottom:20px; display:block; }
+  .pw-input-wrap { position:relative; margin-bottom:8px; }
+  .pw-input-wrap input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 40px 12px 16px; color:var(--text); font-family:inherit; font-size:15px; letter-spacing:0.15em; text-align:center; outline:none; transition:border-color 0.15s; }
+  .pw-input-wrap input:focus { border-color:var(--accent); }
+  .pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; }
+  .entry-error { font-size:12px; color:var(--danger); min-height:18px; margin-bottom:12px; }
+  .entry-btn { width:100%; padding:12px; border-radius:10px; border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; transition:opacity 0.15s; }
+  .entry-btn:hover { opacity:0.85; }
 
-  /* ── メイン画面（最初は非表示） ── */
-  #mainApp { display: none; flex-direction: column; height: 100vh; }
-  #mainApp.visible { display: flex; }
+  #mainApp { display:none; flex-direction:column; height:100vh; }
+  #mainApp.visible { display:flex; }
 
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; height: 54px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; z-index: 1000; }
-  .logo { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; white-space: nowrap; }
-  .header-title { font-size: 13px; color: var(--text-muted); }
-  .header-stats { margin-left: auto; display: flex; gap: 20px; align-items: center; }
-  .stat { display: flex; flex-direction: column; align-items: flex-end; }
-  .stat-value { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); line-height: 1; }
-  .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-  .legend { display: flex; gap: 14px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
-  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
-  .admin-badge { display: flex; align-items: center; gap: 6px; background: rgba(247,201,72,0.12); border: 1px solid rgba(247,201,72,0.3); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--admin); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .admin-badge:hover { background: rgba(247,201,72,0.2); }
-  .admin-badge.active { background: rgba(247,201,72,0.2); border-color: var(--admin); }
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 20px; height:54px; display:flex; align-items:center; gap:16px; flex-shrink:0; z-index:1000; }
+  .logo { font-family:'Space Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.1em; color:var(--accent); text-transform:uppercase; white-space:nowrap; }
+  .header-title { font-size:13px; color:var(--text-muted); }
+  .header-stats { margin-left:auto; display:flex; gap:20px; align-items:center; }
+  .stat { display:flex; flex-direction:column; align-items:flex-end; }
+  .stat-value { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent); line-height:1; }
+  .stat-label { font-size:10px; color:var(--text-muted); margin-top:2px; }
+  .legend { display:flex; gap:14px; }
+  .legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-muted); }
+  .legend-dot { width:9px; height:9px; border-radius:50%; }
+  .admin-badge { display:flex; align-items:center; gap:6px; background:rgba(247,201,72,0.12); border:1px solid rgba(247,201,72,0.3); border-radius:20px; padding:4px 10px; font-size:11px; color:var(--admin); cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+  .admin-badge:hover { background:rgba(247,201,72,0.2); }
+  .admin-badge.active { background:rgba(247,201,72,0.2); border-color:var(--admin); }
 
-  .main { display: flex; flex: 1; overflow: hidden; }
-  .sidebar { width: 300px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
-  .sidebar-top { padding: 12px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
-  .sidebar-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
-  .search-box { display: flex; align-items: center; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; gap: 7px; }
-  .search-box input { background: none; border: none; outline: none; color: var(--text); font-family: inherit; font-size: 13px; width: 100%; }
-  .search-box input::placeholder { color: var(--text-muted); }
-  .filter-section { display: flex; flex-direction: column; gap: 5px; }
-  .filter-section-label { font-size: 10px; color: var(--text-muted); }
-  .filter-row { display: flex; gap: 5px; flex-wrap: wrap; }
-  .filter-btn { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-family: inherit; font-size: 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,0.12); }
+  .main { display:flex; flex:1; overflow:hidden; }
+  .sidebar { width:300px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
+  .sidebar-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+  .sidebar-label { font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); }
+  .search-box { display:flex; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; gap:7px; }
+  .search-box input { background:none; border:none; outline:none; color:var(--text); font-family:inherit; font-size:13px; width:100%; }
+  .search-box input::placeholder { color:var(--text-muted); }
+  .filter-section { display:flex; flex-direction:column; gap:5px; }
+  .filter-section-label { font-size:10px; color:var(--text-muted); }
+  .filter-row { display:flex; gap:5px; flex-wrap:wrap; }
+  .filter-btn { padding:4px 10px; border-radius:20px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-family:inherit; font-size:10px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+  .filter-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(79,142,247,0.12); }
+  .company-list { flex:1; overflow-y:auto; padding:8px; }
+  .company-list::-webkit-scrollbar { width:3px; }
+  .company-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .company-card { padding:11px 12px; border-radius:10px; border:1px solid var(--border); margin-bottom:5px; cursor:pointer; transition:all 0.15s; background:var(--surface2); }
+  .company-card:hover { border-color:var(--accent); }
+  .company-card.selected { border-color:var(--accent); background:rgba(79,142,247,0.08); }
+  .card-top { display:flex; align-items:flex-start; gap:9px; }
+  .card-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; background:#4f8ef7; }
+  .card-info { flex:1; min-width:0; }
+  .card-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card-station { font-size:11px; color:var(--accent2); margin-top:2px; }
+  .card-meta { display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; }
+  .tag { font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(79,142,247,0.15); color:var(--accent); white-space:nowrap; }
+  .tag.green { background:rgba(93,232,160,0.15); color:var(--accent3); }
+  .tag.yellow { background:rgba(247,201,72,0.15); color:var(--accent2); }
+  .tag.purple { background:rgba(167,139,250,0.15); color:#a78bfa; }
+  .add-btn { margin:10px; padding:9px; border-radius:10px; border:1px dashed var(--border); background:none; color:var(--text-muted); font-family:inherit; font-size:13px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .add-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-  .company-list { flex: 1; overflow-y: auto; padding: 8px; }
-  .company-list::-webkit-scrollbar { width: 3px; }
-  .company-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  #map { flex:1; }
+  .leaflet-tile-pane { filter:none; }
+  .leaflet-marker-shadow { display:none; }
 
-  .company-card { padding: 11px 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 5px; cursor: pointer; transition: all 0.15s; background: var(--surface2); }
-  .company-card:hover { border-color: var(--accent); }
-  .company-card.selected { border-color: var(--accent); background: rgba(79,142,247,0.08); }
-  .card-top { display: flex; align-items: flex-start; gap: 9px; }
-  .card-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: #4f8ef7; }
-  .card-info { flex: 1; min-width: 0; }
-  .card-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-station { font-size: 11px; color: var(--accent2); margin-top: 2px; }
-  .card-meta { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
-  .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(79,142,247,0.15); color: var(--accent); white-space: nowrap; }
-  .tag.green { background: rgba(93,232,160,0.15); color: var(--accent3); }
-  .tag.yellow { background: rgba(247,201,72,0.15); color: var(--accent2); }
-  .tag.purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  #detailPanel { display:none; position:absolute; bottom:16px; right:16px; width:290px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; z-index:500; box-shadow:0 8px 32px rgba(0,0,0,0.15); }
+  .detail-row { display:flex; gap:8px; font-size:12px; margin-bottom:5px; align-items:flex-start; }
+  .detail-icon { color:var(--accent2); width:16px; flex-shrink:0; margin-top:1px; }
+  .detail-val { color:var(--text); flex:1; line-height:1.5; }
+  .panel-actions { display:flex; gap:6px; margin-top:11px; }
 
-  .add-btn { margin: 10px; padding: 9px; border-radius: 10px; border: 1px dashed var(--border); background: none; color: var(--text-muted); font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .station-block { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:8px; }
+  .station-block-title { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; }
 
-  #map { flex: 1; }
-  .leaflet-tile-pane { filter: none; }
-  .leaflet-marker-shadow { display: none; }
-
-  #detailPanel { display: none; position: absolute; bottom: 16px; right: 16px; width: 280px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-  .detail-row { display: flex; gap: 8px; font-size: 12px; margin-bottom: 5px; align-items: flex-start; }
-  .detail-icon { color: var(--accent2); width: 16px; flex-shrink: 0; margin-top: 1px; }
-  .detail-val { color: var(--text); flex: 1; line-height: 1.5; }
-  .dist-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(93,232,160,0.15); color: var(--accent3); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 700; margin-top: 8px; }
-  .panel-actions { display: flex; gap: 6px; margin-top: 11px; }
-
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 460px; max-width: 92vw; max-height: 90vh; overflow-y: auto; padding: 22px; animation: slideUp 0.18s ease; }
-  .modal::-webkit-scrollbar { width: 3px; }
-  .modal::-webkit-scrollbar-thumb { background: var(--border); }
-  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
-  .form-group { margin-bottom: 12px; }
-  .form-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 5px; display: block; }
-  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s; resize: vertical; }
-  .form-input:focus { border-color: var(--accent); }
-  textarea.form-input { min-height: 70px; line-height: 1.6; }
-  .form-row { display: flex; gap: 9px; }
-  .form-row .form-group { flex: 1; }
-  .modal-actions { display: flex; gap: 7px; margin-top: 18px; }
-  .btn-primary { flex: 1; padding: 9px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-secondary { flex: 1; padding: 9px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--text-muted); font-family: inherit; font-size: 13px; cursor: pointer; }
-  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
-  .btn-danger { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--danger); background: none; color: var(--danger); font-family: inherit; font-size: 13px; cursor: pointer; }
-  .geocode-btn { margin-top: 6px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: rgba(79,142,247,0.1); color: var(--accent); font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  .geocode-btn:hover { background: rgba(79,142,247,0.2); }
-  .geocode-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .coords-display { font-size: 11px; color: var(--accent3); margin-top: 5px; font-family: 'Space Mono', monospace; min-height: 16px; }
-  .hint { font-size: 11px; color: var(--text-muted); margin-top: 12px; line-height: 1.6; background: var(--surface2); border-radius: 8px; padding: 8px 10px; }
-  .section-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0 12px; }
-  .job-suggestions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-  .job-chip { padding: 4px 9px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-size: 11px; cursor: pointer; transition: all 0.12s; }
-  .job-chip:hover { border-color: var(--accent3); color: var(--accent3); }
-
-  /* 管理者パスワードモーダル */
-  .pw-modal { width: 340px; text-align: center; }
-  .pw-modal h3 { margin-bottom: 8px; }
-  .pw-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-  .pw-error { font-size: 12px; color: var(--danger); margin-top: 8px; min-height: 18px; }
-
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 18px; font-size: 13px; z-index: 99999; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
-  .toast.show { opacity: 1; }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; width:480px; max-width:92vw; max-height:90vh; overflow-y:auto; padding:22px; animation:slideUp 0.18s ease; }
+  .modal::-webkit-scrollbar { width:3px; }
+  .modal::-webkit-scrollbar-thumb { background:var(--border); }
+  @keyframes slideUp { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .modal h3 { font-size:15px; font-weight:700; margin-bottom:16px; }
+  .form-group { margin-bottom:12px; }
+  .form-label { font-size:11px; color:var(--text-muted); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:5px; display:block; }
+  .form-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 11px; color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.15s; resize:vertical; }
+  .form-input:focus { border-color:var(--accent); }
+  textarea.form-input { min-height:70px; line-height:1.6; }
+  .form-row { display:flex; gap:9px; }
+  .form-row .form-group { flex:1; }
+  .modal-actions { display:flex; gap:7px; margin-top:18px; }
+  .btn-primary { flex:1; padding:9px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; transition:opacity 0.15s; }
+  .btn-primary:hover { opacity:0.85; }
+  .btn-secondary { flex:1; padding:9px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--text-muted); font-family:inherit; font-size:13px; cursor:pointer; }
+  .btn-secondary:hover { border-color:var(--text-muted); color:var(--text); }
+  .btn-danger { padding:9px 14px; border-radius:8px; border:1px solid var(--danger); background:none; color:var(--danger); font-family:inherit; font-size:13px; cursor:pointer; }
+  .geocode-btn { margin-top:6px; padding:6px 12px; border-radius:6px; border:1px solid var(--accent); background:rgba(79,142,247,0.1); color:var(--accent); font-family:inherit; font-size:12px; cursor:pointer; transition:all 0.15s; }
+  .geocode-btn:hover { background:rgba(79,142,247,0.2); }
+  .geocode-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .coords-display { font-size:11px; color:var(--accent3); margin-top:5px; font-family:'Space Mono',monospace; min-height:16px; }
+  .hint { font-size:11px; color:var(--text-muted); margin-top:12px; line-height:1.6; background:var(--surface2); border-radius:8px; padding:8px 10px; }
+  .section-divider { border:none; border-top:1px solid var(--border); margin:14px 0 12px; }
+  .job-suggestions { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+  .job-chip { padding:4px 9px; border-radius:20px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-size:11px; cursor:pointer; transition:all 0.12s; }
+  .job-chip:hover { border-color:var(--accent3); color:var(--accent3); }
+  .pw-modal { width:340px; text-align:center; }
+  .pw-modal h3 { margin-bottom:8px; }
+  .pw-subtitle { font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+  .pw-error { font-size:12px; color:var(--danger); margin-top:8px; min-height:18px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 18px; font-size:13px; z-index:99999; opacity:0; transition:opacity 0.2s; pointer-events:none; white-space:nowrap; }
+  .toast.show { opacity:1; }
 </style>
 </head>
 <body>
 
-<!-- ══ 入場パスワード画面 ══ -->
 <div id="entryScreen">
   <div class="entry-box">
     <div class="entry-logo">STAFF MAP</div>
@@ -224,7 +147,6 @@
   </div>
 </div>
 
-<!-- ══ メインアプリ ══ -->
 <div id="mainApp">
   <header>
     <div class="logo">STAFF MAP</div>
@@ -238,18 +160,47 @@
       <div class="stat"><div class="stat-value" id="statStations">0</div><div class="stat-label">登録駅数</div></div>
     </div>
     <button class="admin-badge" id="adminBadge" onclick="handleAdminClick()">
-      <span id="adminIcon">🔒</span>
-      <span id="adminLabel">管理者</span>
+      <span id="adminIcon">🔒</span><span id="adminLabel">管理者</span>
     </button>
   </header>
-
   <div class="main">
     <div class="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-label">就業先リスト</div>
+        <!-- 就業者の自宅ピン -->
+        <div style="background:#fff8e8;border:1px solid #f7c948;border-radius:8px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:700;color:#d4891a;letter-spacing:0.05em;margin-bottom:6px;">🏠 就業者の住所を入力</div>
+          <div style="display:flex;gap:5px;">
+            <input type="text" id="workerAddressInput" placeholder="住所を入力して検索…" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+            <button onclick="geocodeWorker()" style="padding:6px 8px;border-radius:6px;border:none;background:#f7c948;color:#1a1d2e;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">検索</button>
+            <button onclick="clearWorker()" style="padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--text-muted);font-family:inherit;font-size:11px;cursor:pointer;">✕</button>
+          </div>
+          <div id="workerStatus" style="font-size:10px;color:var(--accent3);margin-top:4px;min-height:14px;"></div>
+        </div>
         <div class="search-box">
           <span style="color:var(--text-muted);font-size:12px">🔍</span>
           <input type="text" id="searchInput" placeholder="会社名・駅名・業務内容で検索…">
+        </div>
+        <div class="filter-section">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="filter-section-label">時給フィルター</div>
+            <div style="font-size:11px;color:var(--accent);font-weight:700;" id="wageSliderLabel">指定なし</div>
+          </div>
+          <input type="range" id="wageSlider" min="0" max="2500" step="50" value="0"
+            style="width:100%;accent-color:var(--accent);cursor:pointer;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
+            <span>指定なし</span><span>2500円</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-label">移動手段で絞り込み</div>
+          <div class="filter-row" id="transportFilterRow">
+            <button class="filter-btn active" onclick="toggleTransportFilter('all',this)">すべて</button>
+            <button class="filter-btn" onclick="toggleTransportFilter('徒歩',this)">🚶 徒歩</button>
+            <button class="filter-btn" onclick="toggleTransportFilter('車',this)">🚗 車</button>
+            <button class="filter-btn" onclick="toggleTransportFilter('バス',this)">🚌 バス</button>
+            <button class="filter-btn" onclick="toggleTransportFilter('送迎バス',this)">🚐 送迎バス</button>
+          </div>
         </div>
         <div class="filter-section">
           <div class="filter-section-label">業務内容で絞り込み</div>
@@ -265,13 +216,11 @@
   </div>
 </div>
 
-<!-- 詳細パネル -->
 <div id="detailPanel">
   <div id="detailContent"></div>
   <div class="panel-actions" id="detailActions"></div>
 </div>
 
-<!-- 管理者パスワードモーダル -->
 <div class="modal-overlay" id="adminPwOverlay">
   <div class="modal pw-modal">
     <h3>🔐 管理者ログイン</h3>
@@ -287,7 +236,6 @@
   </div>
 </div>
 
-<!-- 就業先追加・編集モーダル -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle">就業先を追加</h3>
@@ -321,31 +269,106 @@
     </div>
     <hr class="section-divider">
     <div class="form-group">
-      <label class="form-label">就業先 住所 *</label>
-      <input class="form-input" id="f_address" type="text" placeholder="例：大阪府大阪市北区梅田1-1-1">
-      <button class="geocode-btn" id="geocodeCompanyBtn" onclick="geocodeCompany()">📍 住所から地図上の位置を取得</button>
-      <div class="coords-display" id="companyCoords"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">最寄駅名</label>
-        <input class="form-input" id="f_station" type="text" placeholder="例：梅田駅">
-      </div>
-      <div class="form-group">
-        <label class="form-label">徒歩（分）</label>
-        <input class="form-input" id="f_walk" type="number" placeholder="例：5" min="0">
-      </div>
+      <label class="form-label">車通勤</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+        <input type="checkbox" id="f_carOk" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+        🚗 車通勤可能
+      </label>
     </div>
     <div class="form-group">
-      <button class="geocode-btn" id="geocodeStationBtn" onclick="geocodeStation()">🚉 駅名から位置を取得</button>
-      <div class="coords-display" id="stationCoords"></div>
+      <label class="form-label">就業先 住所 *</label>
+      <input class="form-input" id="f_address" type="text" placeholder="例：大阪府大阪市北区梅田1丁目">
+      <button class="geocode-btn" id="geocodeCompanyBtn" onclick="geocodeCompany()">📍 住所から地図上の位置を取得</button>
+      <div class="coords-display" id="companyCoords"></div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <input class="form-input" id="f_lat" type="number" step="0.00001" placeholder="緯度（例：34.70505）" style="font-size:11px;">
+        <input class="form-input" id="f_lng" type="number" step="0.00001" placeholder="経度（例：135.50100）" style="font-size:11px;">
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">💡 位置がズレている場合は緯度・経度を直接入力してください（Googleマップで右クリック→座標をコピー）</div>
     </div>
+    <hr class="section-divider">
+
+    <div class="station-block">
+      <div class="station-block-title">🚉 最寄り駅 1</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-label">駅名</label>
+          <input class="form-input" id="f_station1" type="text" placeholder="例：梅田">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">時間（分）</label>
+          <input class="form-input" id="f_time1" type="number" placeholder="5" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">移動手段</label>
+        <select class="form-input" id="f_transport1">
+          <option value="徒歩">🚶 徒歩</option>
+          <option value="車">🚗 車</option>
+          <option value="バス">🚌 バス</option>
+          <option value="送迎バス">🚐 送迎バス</option>
+        </select>
+      </div>
+      <button class="geocode-btn" onclick="geocodeStationN(1)">🗺️ 駅の位置を取得</button>
+      <div class="coords-display" id="stationCoords1"></div>
+    </div>
+
+    <div class="station-block">
+      <div class="station-block-title">🚉 最寄り駅 2（任意）</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-label">駅名</label>
+          <input class="form-input" id="f_station2" type="text" placeholder="例：西梅田">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">時間（分）</label>
+          <input class="form-input" id="f_time2" type="number" placeholder="8" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">移動手段</label>
+        <select class="form-input" id="f_transport2">
+          <option value="徒歩">🚶 徒歩</option>
+          <option value="車">🚗 車</option>
+          <option value="バス">🚌 バス</option>
+          <option value="送迎バス">🚐 送迎バス</option>
+        </select>
+      </div>
+      <button class="geocode-btn" onclick="geocodeStationN(2)">🗺️ 駅の位置を取得</button>
+      <div class="coords-display" id="stationCoords2"></div>
+    </div>
+
+    <div class="station-block">
+      <div class="station-block-title">🚉 最寄り駅 3（任意）</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label class="form-label">駅名</label>
+          <input class="form-input" id="f_station3" type="text" placeholder="例：北新地">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">時間（分）</label>
+          <input class="form-input" id="f_time3" type="number" placeholder="10" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">移動手段</label>
+        <select class="form-input" id="f_transport3">
+          <option value="徒歩">🚶 徒歩</option>
+          <option value="車">🚗 車</option>
+          <option value="バス">🚌 バス</option>
+          <option value="送迎バス">🚐 送迎バス</option>
+        </select>
+      </div>
+      <button class="geocode-btn" onclick="geocodeStationN(3)">🗺️ 駅の位置を取得</button>
+      <div class="coords-display" id="stationCoords3"></div>
+    </div>
+
     <div class="form-group">
       <label class="form-label">担当者メモ</label>
       <input class="form-input" id="f_note" type="text" placeholder="例：担当：田中">
     </div>
     <div class="hint">
-      💡 住所は「大阪府大阪市〜」のように都道府県から入力すると精度が上がります<br>
+      💡 住所・駅名は都道府県や市区町村を含めると精度が上がります<br>
       ⚠️ 位置取得にはインターネット接続が必要です
     </div>
     <div class="modal-actions">
@@ -359,29 +382,23 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-//  ★ パスワードをここで変更できます ★
-//  ENTRY_PASSWORD  = ページに入るパスワード（全員共通）
-//  ADMIN_PASSWORD  = 編集できる管理者パスワード
-// ══════════════════════════════════════════
 const ENTRY_PASSWORD = 'riosri';
 const ADMIN_PASSWORD = 'admin1234';
-// ══════════════════════════════════════════
-
-const STORAGE_KEY = 'kansai_staff_map_v4';
+const STORAGE_KEY = 'kansai_staff_map_v5';
 const JOB_PRESETS = ['仕分け','ピッキング','シール貼り','梱包','入出荷','フォークリフト','検品','ラベル貼り','清掃','仕分け・梱包'];
+const TICON = { '徒歩':'🚶', '車':'🚗', 'バス':'🚌', '送迎バス':'🚐' };
 
 let isAdmin = false;
+let tempCLat = null, tempCLng = null;
+let tempStations = [{lat:null,lng:null},{lat:null,lng:null},{lat:null,lng:null}];
 
-// ─── 入場パスワード ─────────────────────
 function checkEntryPassword() {
   const val = document.getElementById('entryPwInput').value;
   if (val === ENTRY_PASSWORD || val === ADMIN_PASSWORD) {
     document.getElementById('entryScreen').style.display = 'none';
     document.getElementById('mainApp').classList.add('visible');
     if (val === ADMIN_PASSWORD) activateAdmin();
-    initMap();
-    render();
+    initMap(); render();
   } else {
     document.getElementById('entryError').textContent = 'パスワードが違います';
     document.getElementById('entryPwInput').value = '';
@@ -389,11 +406,9 @@ function checkEntryPassword() {
   }
 }
 function toggleEntryPw() {
-  const input = document.getElementById('entryPwInput');
-  input.type = input.type === 'password' ? 'text' : 'password';
+  const i = document.getElementById('entryPwInput');
+  i.type = i.type === 'password' ? 'text' : 'password';
 }
-
-// ─── 管理者ログイン ─────────────────────
 function handleAdminClick() {
   if (isAdmin) { deactivateAdmin(); return; }
   document.getElementById('adminPwInput').value = '';
@@ -405,8 +420,7 @@ function checkAdminPassword() {
   const val = document.getElementById('adminPwInput').value;
   if (val === ADMIN_PASSWORD) {
     document.getElementById('adminPwOverlay').classList.remove('open');
-    activateAdmin();
-    showToast('管理者モードで入りました 🔓');
+    activateAdmin(); showToast('管理者モードで入りました 🔓');
   } else {
     document.getElementById('adminPwError').textContent = 'パスワードが違います';
     document.getElementById('adminPwInput').value = '';
@@ -426,13 +440,10 @@ function deactivateAdmin() {
   document.getElementById('adminIcon').textContent = '🔒';
   document.getElementById('adminLabel').textContent = '管理者';
   document.getElementById('addBtn').style.display = 'none';
-  closeDetail();
-  render();
-  showToast('ログアウトしました');
+  closeDetail(); render(); showToast('ログアウトしました');
 }
 function closeAdminPwModal() { document.getElementById('adminPwOverlay').classList.remove('open'); }
 
-// ─── データ ─────────────────────────────
 function loadData() {
   try { const r = localStorage.getItem(STORAGE_KEY); if(r) return JSON.parse(r); } catch(e) {}
   return [];
@@ -443,7 +454,28 @@ let companies = loadData();
 let map, selectedId = null, editingId = null;
 let markers = {}, stationMarkers = {}, lines = {};
 let activeFilter = 'all';
-let tempCLat = null, tempCLng = null, tempSLat = null, tempSLng = null;
+let activeTransports = new Set(); // 空=すべて
+
+function toggleTransportFilter(val, btn) {
+  if (val === 'all') {
+    activeTransports.clear();
+    document.querySelectorAll('#transportFilterRow .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    document.querySelector('#transportFilterRow .filter-btn').classList.remove('active'); // 「すべて」を外す
+    if (activeTransports.has(val)) {
+      activeTransports.delete(val);
+      btn.classList.remove('active');
+    } else {
+      activeTransports.add(val);
+      btn.classList.add('active');
+    }
+    if (activeTransports.size === 0) {
+      document.querySelector('#transportFilterRow .filter-btn').classList.add('active');
+    }
+  }
+  render();
+}
 
 function getAllJobTypes() {
   const all = new Set();
@@ -460,15 +492,48 @@ function initMap() {
   map.on('click', () => { closeDetail(); deselectAll(); });
 }
 
+const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
+
 async function geocode(query) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&countrycodes=jp`;
-  const res = await fetch(url, { headers:{'Accept-Language':'ja'} });
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&language=ja&region=JP&key=${GOOGLE_API_KEY}`;
+  const res = await fetch(url);
   const data = await res.json();
-  if (!data.length) throw new Error('not found');
-  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  if (data.status !== 'OK' || !data.results.length) throw new Error('not found');
+  const loc = data.results[0].geometry.location; return { lat: loc.lat, lng: loc.lng };
 }
 
-async function geocodeCompany() {
+let workerMarker = null;
+
+async function geocodeWorker() {
+  const addr = document.getElementById('workerAddressInput').value.trim();
+  if (!addr) { showToast('住所を入力してください', true); return; }
+  document.getElementById('workerStatus').textContent = '取得中…';
+  try {
+    const { lat, lng } = await geocode(addr);
+    if (workerMarker) map.removeLayer(workerMarker);
+    const icon = L.divIcon({
+      html:`<div style="width:36px;height:36px;border-radius:50%;background:#f7c948;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">🏠</div>`,
+      iconSize:[36,36], iconAnchor:[18,18], className:''
+    });
+    workerMarker = L.marker([lat,lng],{icon}).addTo(map);
+    workerMarker.bindTooltip('就業者の自宅', {permanent:true, direction:'top', offset:[0,-20]});
+    map.flyTo([lat,lng], 12, {duration:0.8});
+    document.getElementById('workerStatus').textContent = `✅ 表示中：${addr}`;
+    showToast('自宅ピンを表示しました 🏠');
+  } catch(e) {
+    document.getElementById('workerStatus').textContent = '❌ 見つかりませんでした';
+    showToast('住所が見つかりませんでした', true);
+  }
+}
+
+function clearWorker() {
+  if (workerMarker) { map.removeLayer(workerMarker); workerMarker = null; }
+  document.getElementById('workerAddressInput').value = '';
+  document.getElementById('workerStatus').textContent = '';
+  showToast('自宅ピンを消しました');
+}
+
+
   const addr = document.getElementById('f_address').value.trim();
   if (!addr) { showToast('住所を入力してください', true); return; }
   const btn = document.getElementById('geocodeCompanyBtn');
@@ -476,6 +541,8 @@ async function geocodeCompany() {
   try {
     const { lat, lng } = await geocode(addr);
     tempCLat = lat; tempCLng = lng;
+    document.getElementById('f_lat').value = lat.toFixed(5);
+    document.getElementById('f_lng').value = lng.toFixed(5);
     document.getElementById('companyCoords').textContent = `✅ 取得完了 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     showToast('就業先の位置を取得しました ✅');
   } catch(e) {
@@ -485,41 +552,63 @@ async function geocodeCompany() {
   btn.disabled = false; btn.textContent = '📍 住所から地図上の位置を取得';
 }
 
-async function geocodeStation() {
-  const name = document.getElementById('f_station').value.trim();
+async function geocodeStationN(n) {
+  const name = document.getElementById(`f_station${n}`).value.trim();
   if (!name) { showToast('駅名を入力してください', true); return; }
-  const btn = document.getElementById('geocodeStationBtn');
-  btn.disabled = true; btn.textContent = '取得中…';
+  const coordsEl = document.getElementById(`stationCoords${n}`);
+  coordsEl.textContent = '取得中…';
   try {
-    const { lat, lng } = await geocode(name + ' 駅 関西');
-    tempSLat = lat; tempSLng = lng;
-    document.getElementById('stationCoords').textContent = `✅ 取得完了 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    showToast('駅の位置を取得しました ✅');
+    const { lat, lng } = await geocode(name.replace(/駅$/, '') + '駅');
+    tempStations[n-1] = { lat, lng };
+    coordsEl.textContent = `✅ 取得完了 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    showToast(`駅${n}の位置を取得しました ✅`);
   } catch(e) {
-    document.getElementById('stationCoords').textContent = '❌ 見つかりませんでした';
+    coordsEl.textContent = '❌ 見つかりませんでした';
     showToast('駅が見つかりませんでした', true);
   }
-  btn.disabled = false; btn.textContent = '🚉 駅名から位置を取得';
 }
 
 function render() {
   if (!map) return;
   Object.values(markers).forEach(m => map.removeLayer(m));
-  Object.values(stationMarkers).forEach(m => map.removeLayer(m));
-  Object.values(lines).forEach(l => map.removeLayer(l));
+  Object.values(stationMarkers).forEach(arr => arr.forEach(m => map.removeLayer(m)));
+  Object.values(lines).forEach(arr => arr.forEach(l => map.removeLayer(l)));
   markers = {}; stationMarkers = {}; lines = {};
 
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const filtered = companies.filter(c => {
+  // 管理者は非表示も含めてリスト表示、地図も薄く表示
+  // 非管理者は非表示を完全に除外
+  const minWage = parseInt(document.getElementById('wageSlider').value) || 0;
+  const allFiltered = companies.filter(c => {
+    if (!isAdmin && c.hidden) return false;
+    if (activeTransports.size > 0) {
+      const hasTransport = (c.stations||[]).some(s => activeTransports.has(s.transport));
+      if (!hasTransport) return false;
+    }
+    if (minWage > 0 && (c.wage||0) < minWage) return false;
     const mf = activeFilter==='all' || (c.jobs||'').split(/[、,，\s]+/).map(j=>j.trim()).includes(activeFilter);
-    const ms = !q || c.name.toLowerCase().includes(q) || (c.office||'').toLowerCase().includes(q) || (c.station||'').includes(q) || (c.jobs||'').includes(q) || (c.detail||'').includes(q);
+    const stNames = (c.stations||[]).map(s=>s.name||'').join(' ');
+    const stTransports = (c.stations||[]).map(s=>s.transport||'').join(' ');
+    const words = q.trim().split(/\s+/).filter(Boolean);
+    const ms = words.length === 0 || words.every(w =>
+      c.name.toLowerCase().includes(w) ||
+      (c.office||'').toLowerCase().includes(w) ||
+      stNames.includes(w) ||
+      stTransports.includes(w) ||
+      (c.jobs||'').includes(w) ||
+      (c.detail||'').includes(w) ||
+      (c.carOk && '車通勤可車通勤'.includes(w))
+    );
     return mf && ms;
   });
+  const filtered = allFiltered;
 
   filtered.forEach(c => {
     if (!c.lat || !c.lng) return;
+    if (c.hidden && !isAdmin) return;
+    const isHidden = c.hidden;
     const icon = L.divIcon({
-      html:`<div style="width:34px;height:34px;border-radius:50%;background:#4f8ef7;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.45);cursor:pointer">🏭</div>`,
+      html:`<div style="width:34px;height:34px;border-radius:50%;background:${isHidden?'#aaa':'#4f8ef7'};border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;opacity:${isHidden?'0.5':'1'}">🏭</div>`,
       iconSize:[34,34], iconAnchor:[17,17], className:''
     });
     const m = L.marker([c.lat,c.lng],{icon}).addTo(map);
@@ -527,31 +616,32 @@ function render() {
     m.bindTooltip(c.name, {permanent:false, direction:'top', offset:[0,-18]});
     markers[c.id] = m;
 
-    if (c.slat && c.slng) {
+    const sms = [], lns = [];
+    (c.stations||[]).forEach(s => {
+      if (!s.lat || !s.lng) return;
+      const ico = TICON[s.transport] || '🚉';
       const sIcon = L.divIcon({
-        html:`<div style="width:22px;height:22px;border-radius:50%;background:#f7c948;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 5px rgba(0,0,0,0.4)">🚉</div>`,
+        html:`<div style="width:22px;height:22px;border-radius:50%;background:#f7c948;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 5px rgba(0,0,0,0.3)">${ico}</div>`,
         iconSize:[22,22], iconAnchor:[11,11], className:''
       });
-      const sm = L.marker([c.slat,c.slng],{icon:sIcon}).addTo(map);
+      const sm = L.marker([s.lat,s.lng],{icon:sIcon}).addTo(map);
       sm.on('click', e => { e.originalEvent.stopPropagation(); selectCompany(c.id); });
-      sm.bindTooltip(c.station||'駅', {permanent:false, direction:'top', offset:[0,-13]});
-      stationMarkers[c.id] = sm;
-      const line = L.polyline([[c.lat,c.lng],[c.slat,c.slng]],{color:'#f7c948',weight:1.5,dashArray:'5,6',opacity:0.5}).addTo(map);
-      lines[c.id] = line;
-    }
+      sm.bindTooltip(s.name||'駅', {permanent:false, direction:'top', offset:[0,-13]});
+      sms.push(sm);
+      lns.push(L.polyline([[c.lat,c.lng],[s.lat,s.lng]],{color:'#f7c948',weight:1.5,dashArray:'5,6',opacity:0.5}).addTo(map));
+    });
+    stationMarkers[c.id] = sms;
+    lines[c.id] = lns;
   });
 
-  renderList(filtered);
-  renderFilters();
-  updateStats();
+  renderList(filtered); renderFilters(); updateStats();
 }
 
 function renderFilters() {
   const row = document.getElementById('filterRow');
   const current = activeFilter;
-  const jobTypes = getAllJobTypes();
   row.innerHTML = `<button class="filter-btn ${current==='all'?'active':''}" onclick="setFilter('all',this)">すべて</button>`;
-  jobTypes.forEach(j => {
+  getAllJobTypes().forEach(j => {
     const btn = document.createElement('button');
     btn.className = 'filter-btn' + (current===j?' active':'');
     btn.textContent = j;
@@ -566,21 +656,24 @@ function renderList(filtered) {
   if (!filtered.length) { list.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:24px">該当なし</div>`; return; }
   filtered.forEach(c => {
     const jobTags = (c.jobs||'').split(/[、,，\s]+/).filter(Boolean).map(j=>`<span class="tag purple">${j.trim()}</span>`).join('');
+    const s1 = (c.stations||[])[0];
+    const stText = s1 ? `${TICON[s1.transport]||'🚉'} ${s1.name}${s1.time?` ${s1.transport||'徒歩'}${s1.time}分`:''}` : '未設定';
     const d = document.createElement('div');
-    d.className = 'company-card' + (selectedId===c.id?' selected':'');
+    d.className = 'company-card' + (selectedId===c.id?' selected':'') + (c.hidden?' hidden-card':'');
     d.dataset.id = c.id;
+    d.style.opacity = c.hidden ? '0.5' : '1';
     d.innerHTML = `
       <div class="card-top">
-        <div class="card-icon">🏭</div>
+        <div class="card-icon" style="background:${c.hidden?'#aaa':'#4f8ef7'}">🏭</div>
         <div class="card-info">
-          <div class="card-name">${c.name}${c.office?` <span style="font-weight:400;font-size:11px;color:var(--text-muted)">／${c.office}</span>`:''}</div>
-          <div class="card-station">🚉 ${c.station||'未設定'}${c.walk?` 徒歩${c.walk}分`:''}</div>
+          <div class="card-name">${c.name}${c.office?` <span style="font-weight:400;font-size:11px;color:var(--text-muted)">／${c.office}</span>`:''}${c.hidden?` <span style="font-size:10px;background:#eee;color:#999;border-radius:4px;padding:1px 5px;margin-left:4px">非表示中</span>`:''}</div>
+          <div class="card-station">${stText}</div>
         </div>
       </div>
       <div class="card-meta">
         ${jobTags}
-        <span class="tag green">👥 ${c.staff||0}名</span>
         ${c.wage?`<span class="tag yellow">💴 ${c.wage.toLocaleString()}円</span>`:''}
+        ${c.carOk?`<span class="tag green">🚗 車通勤可</span>`:''}
       </div>`;
     d.onclick = () => selectCompany(c.id);
     list.appendChild(d);
@@ -589,7 +682,9 @@ function renderList(filtered) {
 
 function updateStats() {
   document.getElementById('statTotal').textContent = companies.length;
-  document.getElementById('statStations').textContent = new Set(companies.filter(c=>c.station).map(c=>c.station)).size;
+  const all = new Set();
+  companies.forEach(c => (c.stations||[]).forEach(s => { if(s.name) all.add(s.name); }));
+  document.getElementById('statStations').textContent = all.size;
 }
 
 function selectCompany(id) {
@@ -602,11 +697,14 @@ function selectCompany(id) {
   const jobTags = (c.jobs||'').split(/[、,，\s]+/).filter(Boolean).map(j =>
     `<span style="display:inline-block;background:rgba(167,139,250,0.15);color:#a78bfa;border-radius:4px;padding:2px 6px;font-size:10px;margin:2px">${j.trim()}</span>`
   ).join('');
-  let distText = '';
-  if (c.slat && c.slng && c.lat && c.lng) {
-    const d = Math.round(map.distance([c.lat,c.lng],[c.slat,c.slng]));
-    distText = `<div class="dist-badge">📏 就業先〜駅：約${d}m（徒歩約${c.walk||'?'}分）</div>`;
-  }
+
+  const stationsHtml = (c.stations||[]).filter(s=>s.name).map(s => {
+    let dist = '';
+    if (s.lat && s.lng && c.lat && c.lng) {
+      dist = ` <span style="color:var(--accent3);font-size:10px">約${Math.round(map.distance([c.lat,c.lng],[s.lat,s.lng]))}m</span>`;
+    }
+    return `<div class="detail-row"><span class="detail-icon">${TICON[s.transport]||'🚉'}</span><span class="detail-val">${s.name}${s.time?` ｜ ${s.transport||'徒歩'} ${s.time}分`:''}${dist}</span></div>`;
+  }).join('') || '<div class="detail-row"><span class="detail-icon">🚉</span><span class="detail-val">未設定</span></div>';
 
   document.getElementById('detailContent').innerHTML = `
     <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
@@ -621,14 +719,15 @@ function selectCompany(id) {
     <div class="detail-row"><span class="detail-icon">🔧</span><span class="detail-val">${jobTags||'未設定'}</span></div>
     ${c.detail?`<div class="detail-row"><span class="detail-icon">📋</span><span class="detail-val" style="font-size:11px;color:var(--text-muted)">${c.detail}</span></div>`:''}
     <div class="detail-row"><span class="detail-icon">📍</span><span class="detail-val" style="color:var(--text-muted);font-size:11px">${c.address||'未設定'}</span></div>
-    <div class="detail-row"><span class="detail-icon">🚉</span><span class="detail-val">${c.station||'未設定'}${c.walk?` ｜ 徒歩${c.walk}分`:''}</span></div>
+    ${stationsHtml}
     <div class="detail-row"><span class="detail-icon">👥</span><span class="detail-val">スタッフ ${c.staff||0}名</span></div>
-    ${c.note?`<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${c.note}</span></div>`:''}
-    ${distText}`;
+    ${c.carOk?`<div class="detail-row"><span class="detail-icon">🚗</span><span class="detail-val" style="color:var(--accent3)">車通勤可能</span></div>`:''}
+    ${c.note?`<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${c.note}</span></div>`:''}`;
 
   document.getElementById('detailActions').innerHTML = isAdmin
     ? `<button class="btn-primary" style="font-size:12px;padding:7px" onclick="openEditModal()">✏️ 編集</button>
-       <button class="btn-secondary" style="font-size:12px;padding:7px" onclick="closeDetail()">✕ 閉じる</button>`
+       <button class="${c.hidden?'btn-primary':'btn-secondary'}" style="font-size:12px;padding:7px" onclick="toggleHidden(${c.id})">${c.hidden?'👁 再表示':'🙈 非表示'}</button>
+       <button class="btn-secondary" style="font-size:12px;padding:7px" onclick="closeDetail()">✕</button>`
     : `<button class="btn-secondary" style="font-size:12px;padding:7px;flex:1" onclick="closeDetail()">✕ 閉じる</button>`;
 
   document.getElementById('detailPanel').style.display = 'block';
@@ -644,30 +743,43 @@ function closeDetail() { document.getElementById('detailPanel').style.display='n
 
 function buildJobSuggestions() {
   const all = [...new Set([...JOB_PRESETS, ...getAllJobTypes()])];
-  const container = document.getElementById('jobSuggestions');
-  container.innerHTML = '';
+  const c = document.getElementById('jobSuggestions');
+  c.innerHTML = '';
   all.forEach(j => {
     const chip = document.createElement('span');
-    chip.className = 'job-chip';
-    chip.textContent = j;
+    chip.className = 'job-chip'; chip.textContent = j;
     chip.onclick = () => {
       const input = document.getElementById('f_jobs');
       const parts = input.value.trim() ? input.value.split(/[、,，]+/).map(x=>x.trim()).filter(Boolean) : [];
       if (!parts.includes(j)) { parts.push(j); input.value = parts.join('、'); }
     };
-    container.appendChild(chip);
+    c.appendChild(chip);
   });
+}
+
+function clearModalFields() {
+  ['name','office','staff','wage','jobs','detail','address','note'].forEach(f => {
+    const el = document.getElementById('f_'+f); if(el) el.value='';
+  });
+  document.getElementById('f_carOk').checked = false;
+  document.getElementById('f_lat').value = '';
+  document.getElementById('f_lng').value = '';
+  for (let n=1; n<=3; n++) {
+    document.getElementById(`f_station${n}`).value = '';
+    document.getElementById(`f_time${n}`).value = '';
+    document.getElementById(`f_transport${n}`).value = '徒歩';
+    document.getElementById(`stationCoords${n}`).textContent = '';
+  }
+  document.getElementById('companyCoords').textContent = '';
+  tempCLat = tempCLng = null;
+  tempStations = [{lat:null,lng:null},{lat:null,lng:null},{lat:null,lng:null}];
 }
 
 function openAddModal() {
   if (!isAdmin) return;
-  editingId = null;
-  tempCLat = tempCLng = tempSLat = tempSLng = null;
+  editingId = null; clearModalFields();
   document.getElementById('modalTitle').textContent = '就業先を追加';
   document.getElementById('deleteBtn').style.display = 'none';
-  ['name','office','staff','wage','jobs','detail','address','station','walk','note'].forEach(f => { const el=document.getElementById('f_'+f); if(el) el.value=''; });
-  document.getElementById('companyCoords').textContent = '';
-  document.getElementById('stationCoords').textContent = '';
   buildJobSuggestions();
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -676,8 +788,7 @@ function openEditModal() {
   if (!isAdmin || !selectedId) return;
   const c = companies.find(x=>x.id===selectedId);
   if (!c) return;
-  editingId = c.id;
-  tempCLat = c.lat; tempCLng = c.lng; tempSLat = c.slat; tempSLng = c.slng;
+  editingId = c.id; clearModalFields();
   document.getElementById('modalTitle').textContent = '就業先を編集';
   document.getElementById('deleteBtn').style.display = 'block';
   document.getElementById('f_name').value = c.name||'';
@@ -687,11 +798,20 @@ function openEditModal() {
   document.getElementById('f_jobs').value = c.jobs||'';
   document.getElementById('f_detail').value = c.detail||'';
   document.getElementById('f_address').value = c.address||'';
-  document.getElementById('f_station').value = c.station||'';
-  document.getElementById('f_walk').value = c.walk||'';
   document.getElementById('f_note').value = c.note||'';
+  document.getElementById('f_carOk').checked = c.carOk||false;
+  document.getElementById('f_lat').value = c.lat ? c.lat.toFixed(5) : '';
+  document.getElementById('f_lng').value = c.lng ? c.lng.toFixed(5) : '';
   document.getElementById('companyCoords').textContent = c.lat?`✅ 登録済み ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}`:'';
-  document.getElementById('stationCoords').textContent = c.slat?`✅ 登録済み ${c.slat.toFixed(5)}, ${c.slng.toFixed(5)}`:'';
+  tempCLat = c.lat; tempCLng = c.lng;
+  (c.stations||[]).forEach((s,i) => {
+    const n = i+1;
+    document.getElementById(`f_station${n}`).value = s.name||'';
+    document.getElementById(`f_time${n}`).value = s.time||'';
+    document.getElementById(`f_transport${n}`).value = s.transport||'徒歩';
+    document.getElementById(`stationCoords${n}`).textContent = s.lat?`✅ 登録済み ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}`:'';
+    tempStations[i] = { lat:s.lat||null, lng:s.lng||null };
+  });
   buildJobSuggestions();
   document.getElementById('modalOverlay').classList.add('open');
 }
@@ -702,7 +822,24 @@ function saveCompany() {
   if (!isAdmin) return;
   const name = document.getElementById('f_name').value.trim();
   if (!name) { showToast('会社名を入力してください', true); return; }
-  if (!tempCLat || !tempCLng) { showToast('「住所から位置を取得」ボタンを押してください', true); return; }
+
+  // 手動入力の緯度経度を優先
+  const manLat = parseFloat(document.getElementById('f_lat').value);
+  const manLng = parseFloat(document.getElementById('f_lng').value);
+  if (!isNaN(manLat) && !isNaN(manLng)) { tempCLat = manLat; tempCLng = manLng; }
+
+  if (!tempCLat || !tempCLng) { showToast('「住所から位置を取得」か緯度・経度を入力してください', true); return; }
+  const stations = [];
+  for (let n=1; n<=3; n++) {
+    const sname = document.getElementById(`f_station${n}`).value.trim();
+    if (sname) stations.push({
+      name: sname,
+      time: parseInt(document.getElementById(`f_time${n}`).value)||0,
+      transport: document.getElementById(`f_transport${n}`).value,
+      lat: tempStations[n-1].lat,
+      lng: tempStations[n-1].lng
+    });
+  }
   const data = {
     name, office: document.getElementById('f_office').value.trim(),
     staff: parseInt(document.getElementById('f_staff').value)||0,
@@ -710,15 +847,23 @@ function saveCompany() {
     jobs: document.getElementById('f_jobs').value.trim(),
     detail: document.getElementById('f_detail').value.trim(),
     address: document.getElementById('f_address').value.trim(),
-    station: document.getElementById('f_station').value.trim(),
-    walk: parseInt(document.getElementById('f_walk').value)||0,
-    lat: tempCLat, lng: tempCLng, slat: tempSLat, slng: tempSLng,
+    carOk: document.getElementById('f_carOk').checked,
+    lat: tempCLat, lng: tempCLng, stations,
     note: document.getElementById('f_note').value.trim()
   };
   if (editingId) { const idx=companies.findIndex(x=>x.id===editingId); companies[idx]={...companies[idx],...data}; }
   else { data.id=Date.now(); companies.push(data); }
   saveData(); closeModal(); render();
   showToast('保存しました ✅');
+}
+
+function toggleHidden(id) {
+  const c = companies.find(x=>x.id===id);
+  if (!c || !isAdmin) return;
+  c.hidden = !c.hidden;
+  saveData(); render();
+  selectCompany(id);
+  showToast(c.hidden ? '非表示にしました 🙈' : '再表示しました 👁');
 }
 
 function deleteCompany() {
@@ -746,6 +891,12 @@ function showToast(msg, isError=false) {
 
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => document.getElementById('entryPwInput').focus(), 100);
+  document.getElementById('wageSlider').addEventListener('input', function() {
+    const v = parseInt(this.value);
+    document.getElementById('wageSliderLabel').textContent = v === 0 ? '指定なし' : `${v}円以上`;
+    render();
+  });
+  document.getElementById('workerAddressInput').addEventListener('keydown', function(e){ if(e.key==='Enter') geocodeWorker(); });
   document.getElementById('searchInput').addEventListener('input', render);
   document.getElementById('modalOverlay').addEventListener('click', function(e){if(e.target===this)closeModal();});
   document.getElementById('adminPwOverlay').addEventListener('click', function(e){if(e.target===this)closeAdminPwModal();});
