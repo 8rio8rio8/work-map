@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>関西エリア 就業先マップ</title>
+<title>WORKPIN MAP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ&libraries=geocoding&language=ja&region=JP"></script>
 <style>
   :root {
     --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
@@ -134,9 +135,9 @@
 
 <div id="entryScreen">
   <div class="entry-box">
-    <div class="entry-logo">STAFF MAP</div>
-    <span class="entry-icon">🗺️</span>
-    <div class="entry-title">関西エリア 就業先マップ</div>
+    <div class="entry-logo">WORKPIN MAP</div>
+    <span class="entry-icon">📍</span>
+    <div class="entry-title">WORKPIN MAP</div>
     <div class="entry-subtitle">限定公開です<br>パスワードを入力してください</div>
     <div class="pw-input-wrap">
       <input type="password" id="entryPwInput" placeholder="パスワード" onkeydown="if(event.key==='Enter')checkEntryPassword()">
@@ -149,10 +150,10 @@
 
 <div id="mainApp">
   <header>
-    <div class="logo">STAFF MAP</div>
-    <div class="header-title">関西エリア 就業先マップ</div>
+    <div class="logo">WORKPIN MAP</div>
+    <div class="header-title">就業先マップ</div>
     <div class="legend" style="margin-left:12px">
-      <div class="legend-item"><div class="legend-dot" style="background:#4f8ef7"></div>就業先</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3a7ef5"></div>就業先</div>
       <div class="legend-item"><div class="legend-dot" style="background:#f7c948"></div>最寄駅</div>
     </div>
     <div class="header-stats">
@@ -186,10 +187,20 @@
             <div class="filter-section-label">時給フィルター</div>
             <div style="font-size:11px;color:var(--accent);font-weight:700;" id="wageSliderLabel">指定なし</div>
           </div>
-          <input type="range" id="wageSlider" min="0" max="2500" step="50" value="0"
+          <input type="range" id="wageSlider" min="1000" max="2500" step="50" value="1000"
             style="width:100%;accent-color:var(--accent);cursor:pointer;">
           <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
             <span>指定なし</span><span>2500円</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-label">勤務帯で絞り込み</div>
+          <div class="filter-row" id="shiftFilterRow">
+            <button class="filter-btn active" onclick="toggleShiftFilter('all',this)">すべて</button>
+            <button class="filter-btn" onclick="toggleShiftFilter('day',this)">🌞 日勤</button>
+            <button class="filter-btn" onclick="toggleShiftFilter('eve',this)">🌆 夕勤</button>
+            <button class="filter-btn" onclick="toggleShiftFilter('night',this)">🌙 夜勤</button>
+            <button class="filter-btn" onclick="toggleShiftFilter('short',this)">⏱ 短時間</button>
           </div>
         </div>
         <div class="filter-section">
@@ -249,10 +260,6 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">スタッフ数</label>
-        <input class="form-input" id="f_staff" type="number" placeholder="例：5" min="0">
-      </div>
-      <div class="form-group">
         <label class="form-label">時給（円）</label>
         <input class="form-input" id="f_wage" type="number" placeholder="例：1200" min="0">
       </div>
@@ -266,17 +273,26 @@
     <div class="form-group">
       <label class="form-label">業務の詳細・備考</label>
       <textarea class="form-input" id="f_detail" placeholder="例：立ち仕事メイン、冷蔵倉庫のため服装注意、夜勤あり など"></textarea>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;" id="detailPresets"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">勤務帯</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+          <input type="checkbox" id="f_shift_day" style="accent-color:var(--accent)"> 🌞 日勤
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+          <input type="checkbox" id="f_shift_eve" style="accent-color:var(--accent)"> 🌆 夕勤
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+          <input type="checkbox" id="f_shift_night" style="accent-color:var(--accent)"> 🌙 夜勤
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+          <input type="checkbox" id="f_shift_short" style="accent-color:var(--accent)"> ⏱ 短時間
+        </label>
+      </div>
     </div>
     <hr class="section-divider">
-    <div class="form-group">
-      <label class="form-label">車通勤</label>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
-        <input type="checkbox" id="f_carOk" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
-        🚗 車通勤可能
-      </label>
-    </div>
-    <div class="form-group">
-      <label class="form-label">就業先 住所 *</label>
       <input class="form-input" id="f_address" type="text" placeholder="例：大阪府大阪市北区梅田1丁目">
       <button class="geocode-btn" id="geocodeCompanyBtn" onclick="geocodeCompany()">📍 住所から地図上の位置を取得</button>
       <div class="coords-display" id="companyCoords"></div>
@@ -386,6 +402,7 @@ const ENTRY_PASSWORD = 'riosri';
 const ADMIN_PASSWORD = 'admin1234';
 const STORAGE_KEY = 'kansai_staff_map_v5';
 const JOB_PRESETS = ['仕分け','ピッキング','シール貼り','梱包','入出荷','フォークリフト','検品','ラベル貼り','清掃','仕分け・梱包'];
+const DETAIL_PRESETS = ['座り作業','交通費あり','冷暖房完備'];
 const TICON = { '徒歩':'🚶', '車':'🚗', 'バス':'🚌', '送迎バス':'🚐' };
 
 let isAdmin = false;
@@ -454,7 +471,29 @@ let companies = loadData();
 let map, selectedId = null, editingId = null;
 let markers = {}, stationMarkers = {}, lines = {};
 let activeFilter = 'all';
-let activeTransports = new Set(); // 空=すべて
+let activeTransports = new Set();
+let activeShifts = new Set();
+
+function toggleShiftFilter(val, btn) {
+  if (val === 'all') {
+    activeShifts.clear();
+    document.querySelectorAll('#shiftFilterRow .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    document.querySelector('#shiftFilterRow .filter-btn').classList.remove('active');
+    if (activeShifts.has(val)) {
+      activeShifts.delete(val);
+      btn.classList.remove('active');
+    } else {
+      activeShifts.add(val);
+      btn.classList.add('active');
+    }
+    if (activeShifts.size === 0) {
+      document.querySelector('#shiftFilterRow .filter-btn').classList.add('active');
+    }
+  }
+  render();
+}
 
 function toggleTransportFilter(val, btn) {
   if (val === 'all') {
@@ -493,13 +532,24 @@ function initMap() {
 }
 
 const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
+let geocoder = null;
+
+function getGeocoder() {
+  if (!geocoder) geocoder = new google.maps.Geocoder();
+  return geocoder;
+}
 
 async function geocode(query) {
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&language=ja&region=JP&key=${GOOGLE_API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.status !== 'OK' || !data.results.length) throw new Error('not found');
-  const loc = data.results[0].geometry.location; return { lat: loc.lat, lng: loc.lng };
+  return new Promise((resolve, reject) => {
+    getGeocoder().geocode({ address: query, region: 'JP', language: 'ja' }, (results, status) => {
+      if (status === 'OK' && results.length > 0) {
+        const loc = results[0].geometry.location;
+        resolve({ lat: loc.lat(), lng: loc.lng() });
+      } else {
+        reject(new Error('not found: ' + status));
+      }
+    });
+  });
 }
 
 let workerMarker = null;
@@ -581,11 +631,16 @@ function render() {
   const minWage = parseInt(document.getElementById('wageSlider').value) || 0;
   const allFiltered = companies.filter(c => {
     if (!isAdmin && c.hidden) return false;
+    if (activeShifts.size > 0) {
+      const shifts = c.shifts || {};
+      const hasShift = [...activeShifts].some(s => shifts[s]);
+      if (!hasShift) return false;
+    }
     if (activeTransports.size > 0) {
       const hasTransport = (c.stations||[]).some(s => activeTransports.has(s.transport));
       if (!hasTransport) return false;
     }
-    if (minWage > 0 && (c.wage||0) < minWage) return false;
+    if (minWage > 1000 && (c.wage||0) < minWage) return false;
     const mf = activeFilter==='all' || (c.jobs||'').split(/[、,，\s]+/).map(j=>j.trim()).includes(activeFilter);
     const stNames = (c.stations||[]).map(s=>s.name||'').join(' ');
     const stTransports = (c.stations||[]).map(s=>s.transport||'').join(' ');
@@ -596,8 +651,7 @@ function render() {
       stNames.includes(w) ||
       stTransports.includes(w) ||
       (c.jobs||'').includes(w) ||
-      (c.detail||'').includes(w) ||
-      (c.carOk && '車通勤可車通勤'.includes(w))
+      (c.detail||'').includes(w)
     );
     return mf && ms;
   });
@@ -608,8 +662,12 @@ function render() {
     if (c.hidden && !isAdmin) return;
     const isHidden = c.hidden;
     const icon = L.divIcon({
-      html:`<div style="width:34px;height:34px;border-radius:50%;background:${isHidden?'#aaa':'#4f8ef7'};border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;opacity:${isHidden?'0.5':'1'}">🏭</div>`,
-      iconSize:[34,34], iconAnchor:[17,17], className:''
+      html:`<div style="position:relative;width:32px;height:40px;display:flex;flex-direction:column;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${isHidden?'#aaa':'#3a7ef5'};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;opacity:${isHidden?'0.5':'1'}">
+          <div style="transform:rotate(45deg);font-size:13px">📍</div>
+        </div>
+      </div>`,
+      iconSize:[32,40], iconAnchor:[16,40], className:''
     });
     const m = L.marker([c.lat,c.lng],{icon}).addTo(map);
     m.on('click', e => { e.originalEvent.stopPropagation(); selectCompany(c.id); });
@@ -664,7 +722,7 @@ function renderList(filtered) {
     d.style.opacity = c.hidden ? '0.5' : '1';
     d.innerHTML = `
       <div class="card-top">
-        <div class="card-icon" style="background:${c.hidden?'#aaa':'#4f8ef7'}">🏭</div>
+        <div class="card-icon" style="background:${c.hidden?'#aaa':'#3a7ef5'}">📍</div>
         <div class="card-info">
           <div class="card-name">${c.name}${c.office?` <span style="font-weight:400;font-size:11px;color:var(--text-muted)">／${c.office}</span>`:''}${c.hidden?` <span style="font-size:10px;background:#eee;color:#999;border-radius:4px;padding:1px 5px;margin-left:4px">非表示中</span>`:''}</div>
           <div class="card-station">${stText}</div>
@@ -673,7 +731,6 @@ function renderList(filtered) {
       <div class="card-meta">
         ${jobTags}
         ${c.wage?`<span class="tag yellow">💴 ${c.wage.toLocaleString()}円</span>`:''}
-        ${c.carOk?`<span class="tag green">🚗 車通勤可</span>`:''}
       </div>`;
     d.onclick = () => selectCompany(c.id);
     list.appendChild(d);
@@ -708,7 +765,7 @@ function selectCompany(id) {
 
   document.getElementById('detailContent').innerHTML = `
     <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
-      <div style="width:38px;height:38px;border-radius:9px;background:#4f8ef7;display:flex;align-items:center;justify-content:center;font-size:17px">🏭</div>
+      <div style="width:38px;height:38px;border-radius:9px;background:#3a7ef5;display:flex;align-items:center;justify-content:center;font-size:17px">📍</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:700">${c.name}</div>
         ${c.office?`<div style="font-size:11px;color:var(--text-muted)">${c.office}</div>`:''}
@@ -721,9 +778,8 @@ function selectCompany(id) {
     <div class="detail-row"><span class="detail-icon">📍</span><span class="detail-val" style="color:var(--text-muted);font-size:11px">${c.address||'未設定'}</span></div>
     ${stationsHtml}
     <div class="detail-row"><span class="detail-icon">👥</span><span class="detail-val">スタッフ ${c.staff||0}名</span></div>
-    ${c.carOk?`<div class="detail-row"><span class="detail-icon">🚗</span><span class="detail-val" style="color:var(--accent3)">車通勤可能</span></div>`:''}
-    ${c.note?`<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${c.note}</span></div>`:''}`;
-
+    ${c.note?`<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${c.note}</span></div>`:''}
+    ${(()=>{const sh=c.shifts||{};const arr=[];if(sh.day)arr.push('🌞日勤');if(sh.eve)arr.push('🌆夕勤');if(sh.night)arr.push('🌙夜勤');if(sh.short)arr.push('⏱短時間');return arr.length?`<div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-val">${arr.join('　')}</span></div>`:'';})()}`;
   document.getElementById('detailActions').innerHTML = isAdmin
     ? `<button class="btn-primary" style="font-size:12px;padding:7px" onclick="openEditModal()">✏️ 編集</button>
        <button class="${c.hidden?'btn-primary':'btn-secondary'}" style="font-size:12px;padding:7px" onclick="toggleHidden(${c.id})">${c.hidden?'👁 再表示':'🙈 非表示'}</button>
@@ -755,15 +811,28 @@ function buildJobSuggestions() {
     };
     c.appendChild(chip);
   });
+  const dp = document.getElementById('detailPresets');
+  dp.innerHTML = '';
+  DETAIL_PRESETS.forEach(p => {
+    const chip = document.createElement('span');
+    chip.className = 'job-chip'; chip.textContent = p;
+    chip.onclick = () => {
+      const input = document.getElementById('f_detail');
+      if (!input.value.includes(p)) {
+        input.value = input.value ? input.value + '、' + p : p;
+      }
+    };
+    dp.appendChild(chip);
+  });
 }
 
 function clearModalFields() {
   ['name','office','staff','wage','jobs','detail','address','note'].forEach(f => {
     const el = document.getElementById('f_'+f); if(el) el.value='';
   });
-  document.getElementById('f_carOk').checked = false;
   document.getElementById('f_lat').value = '';
   document.getElementById('f_lng').value = '';
+  ['day','eve','night','short'].forEach(s => { document.getElementById(`f_shift_${s}`).checked = false; });
   for (let n=1; n<=3; n++) {
     document.getElementById(`f_station${n}`).value = '';
     document.getElementById(`f_time${n}`).value = '';
@@ -799,9 +868,10 @@ function openEditModal() {
   document.getElementById('f_detail').value = c.detail||'';
   document.getElementById('f_address').value = c.address||'';
   document.getElementById('f_note').value = c.note||'';
-  document.getElementById('f_carOk').checked = c.carOk||false;
   document.getElementById('f_lat').value = c.lat ? c.lat.toFixed(5) : '';
   document.getElementById('f_lng').value = c.lng ? c.lng.toFixed(5) : '';
+  const shifts = c.shifts || {};
+  ['day','eve','night','short'].forEach(s => { document.getElementById(`f_shift_${s}`).checked = shifts[s]||false; });
   document.getElementById('companyCoords').textContent = c.lat?`✅ 登録済み ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}`:'';
   tempCLat = c.lat; tempCLng = c.lng;
   (c.stations||[]).forEach((s,i) => {
@@ -847,7 +917,12 @@ function saveCompany() {
     jobs: document.getElementById('f_jobs').value.trim(),
     detail: document.getElementById('f_detail').value.trim(),
     address: document.getElementById('f_address').value.trim(),
-    carOk: document.getElementById('f_carOk').checked,
+    shifts: {
+      day: document.getElementById('f_shift_day').checked,
+      eve: document.getElementById('f_shift_eve').checked,
+      night: document.getElementById('f_shift_night').checked,
+      short: document.getElementById('f_shift_short').checked,
+    },
     lat: tempCLat, lng: tempCLng, stations,
     note: document.getElementById('f_note').value.trim()
   };
@@ -893,7 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => document.getElementById('entryPwInput').focus(), 100);
   document.getElementById('wageSlider').addEventListener('input', function() {
     const v = parseInt(this.value);
-    document.getElementById('wageSliderLabel').textContent = v === 0 ? '指定なし' : `${v}円以上`;
+    document.getElementById('wageSliderLabel').textContent = v <= 1000 ? '指定なし' : `${v}円以上`;
     render();
   });
   document.getElementById('workerAddressInput').addEventListener('keydown', function(e){ if(e.key==='Enter') geocodeWorker(); });
