@@ -533,7 +533,7 @@ function clearWorker() {
   showToast('自宅ピンを消しました');
 }
 
-
+async function geocodeCompany() {
   const addr = document.getElementById('f_address').value.trim();
   if (!addr) { showToast('住所を入力してください', true); return; }
   const btn = document.getElementById('geocodeCompanyBtn');
