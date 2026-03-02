@@ -52,7 +52,7 @@
 
   .main { display:flex; flex:1; overflow:hidden; }
   .sidebar { width:300px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
-  .sidebar-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+  .sidebar-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height:60vh; }
   .sidebar-label { font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); }
   .search-box { display:flex; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; gap:7px; }
   .search-box input { background:none; border:none; outline:none; color:var(--text); font-family:inherit; font-size:13px; width:100%; }
@@ -827,7 +827,7 @@ function buildJobSuggestions() {
 }
 
 function clearModalFields() {
-  ['name','office','staff','wage','jobs','detail','address','note'].forEach(f => {
+  ['name','office','wage','jobs','detail','address','note'].forEach(f => {
     const el = document.getElementById('f_'+f); if(el) el.value='';
   });
   document.getElementById('f_lat').value = '';
@@ -862,7 +862,6 @@ function openEditModal() {
   document.getElementById('deleteBtn').style.display = 'block';
   document.getElementById('f_name').value = c.name||'';
   document.getElementById('f_office').value = c.office||'';
-  document.getElementById('f_staff').value = c.staff||'';
   document.getElementById('f_wage').value = c.wage||'';
   document.getElementById('f_jobs').value = c.jobs||'';
   document.getElementById('f_detail').value = c.detail||'';
@@ -912,7 +911,6 @@ function saveCompany() {
   }
   const data = {
     name, office: document.getElementById('f_office').value.trim(),
-    staff: parseInt(document.getElementById('f_staff').value)||0,
     wage: parseInt(document.getElementById('f_wage').value)||0,
     jobs: document.getElementById('f_jobs').value.trim(),
     detail: document.getElementById('f_detail').value.trim(),
