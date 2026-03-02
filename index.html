@@ -154,7 +154,7 @@
     <div class="header-title">就業先マップ</div>
     <div class="legend" style="margin-left:12px">
       <div class="legend-item"><div class="legend-dot" style="background:#3a7ef5"></div>就業先</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f7c948"></div>最寄駅</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div>最寄駅</div>
     </div>
     <div class="header-stats">
       <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">就業先数</div></div>
@@ -679,7 +679,7 @@ function render() {
       if (!s.lat || !s.lng) return;
       const ico = TICON[s.transport] || '🚉';
       const sIcon = L.divIcon({
-        html:`<div style="width:22px;height:22px;border-radius:50%;background:#f7c948;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 5px rgba(0,0,0,0.3)">${ico}</div>`,
+        html:`<div style="width:22px;height:22px;border-radius:50%;background:#e53935;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 5px rgba(0,0,0,0.3)">${ico}</div>`,
         iconSize:[22,22], iconAnchor:[11,11], className:''
       });
       const sm = L.marker([s.lat,s.lng],{icon:sIcon}).addTo(map);
