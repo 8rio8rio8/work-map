@@ -8,8 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ
-&libraries=geocoding&language=ja&region=JP"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ&libraries=geocoding&language=ja&region=JP"></script>
 <style>
   :root {
     --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
@@ -418,7 +417,13 @@ function checkEntryPassword() {
     document.getElementById('entryScreen').style.display = 'none';
     document.getElementById('mainApp').classList.add('visible');
     if (val === ADMIN_PASSWORD) activateAdmin();
-    initMap(); render();
+    initMap();
+    showToast('データを読み込み中… ⏳');
+    loadDataFromSheet().then(data => {
+      companies = data;
+      render();
+      showToast(`${companies.length}件のデータを読み込みました ✅`);
+    });
   } else {
     document.getElementById('entryError').textContent = 'パスワードが違います';
     document.getElementById('entryPwInput').value = '';
@@ -464,13 +469,33 @@ function deactivateAdmin() {
 }
 function closeAdminPwModal() { document.getElementById('adminPwOverlay').classList.remove('open'); }
 
-function loadData() {
-  try { const r = localStorage.getItem(STORAGE_KEY); if(r) return JSON.parse(r); } catch(e) {}
+const GAS_URL = 'https://script.google.com/macros/s/AKfycby94EJAa6VDpMS6ehpsiI_LJmIFLW0M_2z9kRnfIGGvOxs7vSZZ5SKr3uMjNbPm4kWX/exec';
+
+async function loadDataFromSheet() {
+  try {
+    const res = await fetch(`${GAS_URL}?action=getAll`);
+    const json = await res.json();
+    if (json.success) return json.companies;
+  } catch(e) { console.error('load error', e); }
   return [];
 }
-function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(companies)); } catch(e) {} }
 
-let companies = loadData();
+async function saveDataToSheet(data) {
+  try {
+    const res = await fetch(`${GAS_URL}?action=save&data=${encodeURIComponent(JSON.stringify(data))}`);
+    const json = await res.json();
+    return json;
+  } catch(e) { console.error('save error', e); return { error: e.toString() }; }
+}
+
+async function deleteDataFromSheet(id) {
+  try {
+    const res = await fetch(`${GAS_URL}?action=delete&id=${id}`);
+    const json = await res.json();
+    return json;
+  } catch(e) { console.error('delete error', e); return { error: e.toString() }; }
+}
+let companies = [];
 let map, selectedId = null, editingId = null;
 let markers = {}, stationMarkers = {}, lines = {};
 let activeFilter = 'all';
@@ -938,26 +963,43 @@ function saveCompany() {
     lat: tempCLat, lng: tempCLng, stations,
     note: document.getElementById('f_note').value.trim()
   };
-  if (editingId) { const idx=companies.findIndex(x=>x.id===editingId); companies[idx]={...companies[idx],...data}; }
-  else { data.id=Date.now(); companies.push(data); }
-  saveData(); closeModal(); render();
-  showToast('保存しました ✅');
+  if (editingId) {
+    const idx = companies.findIndex(x=>x.id===editingId);
+    companies[idx] = {...companies[idx], ...data};
+    data.id = editingId;
+  } else {
+    data.id = Date.now();
+    companies.push(data);
+  }
+  showToast('保存中… ⏳');
+  saveDataToSheet(data).then(res => {
+    if (res.error) { showToast('保存に失敗しました ❌', true); return; }
+    closeModal(); render();
+    showToast('保存しました ✅');
+  });
 }
 
 function toggleHidden(id) {
   const c = companies.find(x=>x.id===id);
   if (!c || !isAdmin) return;
   c.hidden = !c.hidden;
-  saveData(); render();
-  selectCompany(id);
-  showToast(c.hidden ? '非表示にしました 🙈' : '再表示しました 👁');
+  saveDataToSheet(c).then(() => {
+    render();
+    selectCompany(id);
+    showToast(c.hidden ? '非表示にしました 🙈' : '再表示しました 👁');
+  });
 }
 
 function deleteCompany() {
   if (!isAdmin || !editingId || !confirm('この就業先を削除しますか？')) return;
-  companies = companies.filter(x=>x.id!==editingId);
-  saveData(); closeModal(); closeDetail(); render();
-  showToast('削除しました');
+  const id = editingId;
+  companies = companies.filter(x=>x.id!==id);
+  showToast('削除中… ⏳');
+  deleteDataFromSheet(id).then(res => {
+    if (res.error) { showToast('削除に失敗しました ❌', true); return; }
+    closeModal(); closeDetail(); render();
+    showToast('削除しました');
+  });
 }
 
 function setFilter(val, btn) {
