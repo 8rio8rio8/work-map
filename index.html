@@ -8,7 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ&libraries=geocoding&language=ja&region=JP"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ
+&libraries=geocoding&language=ja&region=JP"></script>
 <style>
   :root {
     --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
@@ -153,8 +154,10 @@
     <div class="logo">WORKPIN MAP</div>
     <div class="header-title">就業先マップ</div>
     <div class="legend" style="margin-left:12px">
-      <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div>就業先</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div>最寄駅</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3a7ef5"></div>男性向け</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div>女性向け</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f7c948"></div>男女可</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f7c948"></div>最寄駅</div>
     </div>
     <div class="header-stats">
       <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">就業先数</div></div>
@@ -661,10 +664,12 @@ function render() {
     if (!c.lat || !c.lng) return;
     if (c.hidden && !isAdmin) return;
     const isHidden = c.hidden;
+    const detail = c.detail || '';
+    const genderBorder = isHidden ? '#999' : detail.includes('女、') ? '#e53935' : detail.includes('男、') ? '#3a7ef5' : '#f7c948';
     const icon = L.divIcon({
       html:`<div style="position:relative;width:32px;height:40px;display:flex;flex-direction:column;align-items:center;">
-        <div style="width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${isHidden?'#ccc':'#ffffff'};border:3px solid ${isHidden?'#999':'#e53935'};box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;opacity:${isHidden?'0.5':'1'}">
-          <div style="transform:rotate(45deg);font-size:14px">${isHidden?'📍':'📍'}</div>
+        <div style="width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${isHidden?'#ccc':'#ffffff'};border:3px solid ${genderBorder};box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;opacity:${isHidden?'0.5':'1'}">
+          <div style="transform:rotate(45deg);font-size:14px">📍</div>
         </div>
       </div>`,
       iconSize:[32,40], iconAnchor:[16,40], className:''
