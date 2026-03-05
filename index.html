@@ -851,7 +851,6 @@ function selectCompany(id) {
     ${c.detail?`<div class="detail-row"><span class="detail-icon">📋</span><span class="detail-val" style="font-size:11px;color:var(--text-muted)">${c.detail}</span></div>`:''}
     <div class="detail-row"><span class="detail-icon">📍</span><span class="detail-val" style="color:var(--text-muted);font-size:11px">${c.address||'未設定'}</span></div>
     ${stationsHtml}
-    <div class="detail-row"><span class="detail-icon">👥</span><span class="detail-val">スタッフ ${c.staff||0}名</span></div>
     ${c.note?`<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${c.note}</span></div>`:''}
     ${(()=>{const sh=c.shifts||{};const arr=[];if(sh.day)arr.push('🌞日勤');if(sh.eve)arr.push('🌆夕勤');if(sh.night)arr.push('🌙夜勤');if(sh.short)arr.push('⏱短時間');return arr.length?`<div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-val">${arr.join('　')}</span></div>`:'';})()}`;
   document.getElementById('detailActions').innerHTML = isAdmin
