@@ -8,7 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ&libraries=geocoding&language=ja&region=JP"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ
+&libraries=geocoding&language=ja&region=JP"></script>
 <style>
   :root {
     --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
@@ -51,7 +52,7 @@
   .admin-badge.active { background:rgba(247,201,72,0.2); border-color:var(--admin); }
 
   .main { display:flex; flex:1; overflow:hidden; }
-  .sidebar { width:300px; min-width:200px; max-width:500px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; position:relative; }
+  .sidebar { width:340px; min-width:200px; max-width:500px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; position:relative; }
   .sidebar-resizer { position:absolute; right:0; top:0; bottom:0; width:5px; cursor:col-resize; background:transparent; z-index:10; transition:background 0.15s; }
   .sidebar-resizer:hover { background:var(--accent); opacity:0.4; }
   .sidebar-top { padding:12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height:60vh; }
@@ -562,8 +563,35 @@ function initMap() {
   map.on('click', () => { closeDetail(); deselectAll(); });
 }
 
-const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
+const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ
+';
 let geocoder = null;
+
+const GEOCODE_LIMIT_ADMIN = 300;
+const GEOCODE_LIMIT_USER = 100;
+
+function getGeocodeCount() {
+  const today = new Date().toLocaleDateString('ja-JP');
+  const saved = JSON.parse(localStorage.getItem('geocode_count') || '{}');
+  if (saved.date !== today) return 0;
+  return saved.count || 0;
+}
+
+function incrementGeocodeCount() {
+  const today = new Date().toLocaleDateString('ja-JP');
+  const count = getGeocodeCount() + 1;
+  localStorage.setItem('geocode_count', JSON.stringify({ date: today, count }));
+}
+
+function checkGeocodeLimit() {
+  const limit = isAdmin ? GEOCODE_LIMIT_ADMIN : GEOCODE_LIMIT_USER;
+  const count = getGeocodeCount();
+  if (count >= limit) {
+    showToast(`本日の位置取得上限（${limit}回）に達しました`, true);
+    return false;
+  }
+  return true;
+}
 
 function getGeocoder() {
   if (!geocoder) geocoder = new google.maps.Geocoder();
@@ -588,9 +616,11 @@ let workerMarker = null;
 async function geocodeWorker() {
   const addr = document.getElementById('workerAddressInput').value.trim();
   if (!addr) { showToast('住所を入力してください', true); return; }
+  if (!checkGeocodeLimit()) return;
   document.getElementById('workerStatus').textContent = '取得中…';
   try {
     const { lat, lng } = await geocode(addr);
+    incrementGeocodeCount();
     if (workerMarker) map.removeLayer(workerMarker);
     const icon = L.divIcon({
       html:`<div style="width:36px;height:36px;border-radius:50%;background:#f7c948;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">🏠</div>`,
@@ -617,10 +647,12 @@ function clearWorker() {
 async function geocodeCompany() {
   const addr = document.getElementById('f_address').value.trim();
   if (!addr) { showToast('住所を入力してください', true); return; }
+  if (!checkGeocodeLimit()) return;
   const btn = document.getElementById('geocodeCompanyBtn');
   btn.disabled = true; btn.textContent = '取得中…';
   try {
     const { lat, lng } = await geocode(addr);
+    incrementGeocodeCount();
     tempCLat = lat; tempCLng = lng;
     document.getElementById('f_lat').value = lat.toFixed(5);
     document.getElementById('f_lng').value = lng.toFixed(5);
@@ -636,10 +668,12 @@ async function geocodeCompany() {
 async function geocodeStationN(n) {
   const name = document.getElementById(`f_station${n}`).value.trim();
   if (!name) { showToast('駅名を入力してください', true); return; }
+  if (!checkGeocodeLimit()) return;
   const coordsEl = document.getElementById(`stationCoords${n}`);
   coordsEl.textContent = '取得中…';
   try {
     const { lat, lng } = await geocode(name.replace(/駅$/, '') + '駅');
+    incrementGeocodeCount();
     tempStations[n-1] = { lat, lng };
     coordsEl.textContent = `✅ 取得完了 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     showToast(`駅${n}の位置を取得しました ✅`);
