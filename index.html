@@ -706,7 +706,7 @@ function render() {
       if (!hasTransport) return false;
     }
     if (minWage > 1000 && (c.wage||0) < minWage) return false;
-    const mf = activeFilter==='all' || (c.jobs||'').split(/[、,，\s]+/).map(j=>j.trim()).includes(activeFilter);
+    const mf = activeFilter==='all' || (c.difficulty||'') === activeFilter;
     const stNames = (c.stations||[]).map(s=>s.name||'').join(' ');
     const stTransports = (c.stations||[]).map(s=>s.transport||'').join(' ');
     const words = q.trim().split(/\s+/).filter(Boolean);
@@ -767,11 +767,11 @@ function renderFilters() {
   const row = document.getElementById('filterRow');
   const current = activeFilter;
   row.innerHTML = `<button class="filter-btn ${current==='all'?'active':''}" onclick="setFilter('all',this)">すべて</button>`;
-  getAllJobTypes().forEach(j => {
+  ['イージー','スタンダード','アクティブ'].forEach(d => {
     const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (current===j?' active':'');
-    btn.textContent = j;
-    btn.onclick = function() { setFilter(j, this); };
+    btn.className = 'filter-btn' + (current===d?' active':'');
+    btn.textContent = d;
+    btn.onclick = function() { setFilter(d, this); };
     row.appendChild(btn);
   });
 }
