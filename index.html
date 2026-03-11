@@ -502,7 +502,7 @@ async function deleteDataFromSheet(id) {
 let companies = [];
 let map, selectedId = null, editingId = null;
 let markers = {}, stationMarkers = {}, lines = {};
-let activeFilter = 'all';
+let activeFilter = new Set();
 let activeTransports = new Set();
 let activeShifts = new Set();
 
@@ -706,7 +706,7 @@ function render() {
       if (!hasTransport) return false;
     }
     if (minWage > 1000 && (c.wage||0) < minWage) return false;
-    const mf = activeFilter==='all' || (c.difficulty||'') === activeFilter;
+    const mf = activeFilter.size === 0 || activeFilter.has(c.difficulty||'');
     const stNames = (c.stations||[]).map(s=>s.name||'').join(' ');
     const stTransports = (c.stations||[]).map(s=>s.transport||'').join(' ');
     const words = q.trim().split(/\s+/).filter(Boolean);
@@ -765,11 +765,10 @@ function render() {
 
 function renderFilters() {
   const row = document.getElementById('filterRow');
-  const current = activeFilter;
-  row.innerHTML = `<button class="filter-btn ${current==='all'?'active':''}" onclick="setFilter('all',this)">すべて</button>`;
+  row.innerHTML = `<button class="filter-btn ${activeFilter.size===0?'active':''}" onclick="setFilter('all',this)">すべて</button>`;
   ['イージー','スタンダード','アクティブ'].forEach(d => {
     const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (current===d?' active':'');
+    btn.className = 'filter-btn' + (activeFilter.has(d)?' active':'');
     btn.textContent = d;
     btn.onclick = function() { setFilter(d, this); };
     row.appendChild(btn);
@@ -1039,9 +1038,23 @@ function deleteCompany() {
 }
 
 function setFilter(val, btn) {
-  activeFilter = val;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
+  if (val === 'all') {
+    activeFilter.clear();
+    document.querySelectorAll('#filterRow .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    document.querySelector('#filterRow .filter-btn').classList.remove('active');
+    if (activeFilter.has(val)) {
+      activeFilter.delete(val);
+      if(btn) btn.classList.remove('active');
+    } else {
+      activeFilter.add(val);
+      if(btn) btn.classList.add('active');
+    }
+    if (activeFilter.size === 0) {
+      document.querySelector('#filterRow .filter-btn').classList.add('active');
+    }
+  }
   render();
 }
 
