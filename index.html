@@ -8,7 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ&libraries=geocoding&language=ja&region=JP"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ
+&libraries=geocoding&language=ja&region=JP"></script>
 <style>
   :root {
     --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
@@ -554,12 +555,13 @@ function getAllJobTypes() {
 }
 
 function initMap() {
-  map = L.map('map', { center:[34.75,135.5], zoom:10, zoomControl:false });
+  map = L.map('map', { center:[34.75,135.5], zoom:10, zoomControl:false, preferCanvas:false });
   L.control.zoom({ position:'topright' }).addTo(map);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution:'© OpenStreetMap contributors', maxZoom:18
   }).addTo(map);
   map.on('click', () => { closeDetail(); deselectAll(); });
+  map.on('zoomend moveend', () => { map.invalidateSize(); });
 }
 
 const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
@@ -626,7 +628,6 @@ async function geocodeWorker() {
     });
     workerMarker = L.marker([lat,lng],{icon}).addTo(map);
     workerMarker.bindTooltip('就業者の自宅', {permanent:true, direction:'top', offset:[0,-20]});
-    map.flyTo([lat,lng], 12, {duration:0.8});
     document.getElementById('workerStatus').textContent = `✅ 表示中：${addr}`;
     showToast('自宅ピンを表示しました 🏠');
   } catch(e) {
