@@ -555,13 +555,12 @@ function getAllJobTypes() {
 }
 
 function initMap() {
-  map = L.map('map', { center:[34.75,135.5], zoom:10, zoomControl:false, preferCanvas:false });
+  map = L.map('map', { center:[34.75,135.5], zoom:10, zoomControl:false, renderer: L.svg() });
   L.control.zoom({ position:'topright' }).addTo(map);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap contributors', maxZoom:18
+    attribution:'© OpenStreetMap contributors', maxZoom:18, keepBuffer:4
   }).addTo(map);
   map.on('click', () => { closeDetail(); deselectAll(); });
-  map.on('zoomend moveend', () => { map.invalidateSize(); });
 }
 
 const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
@@ -612,6 +611,7 @@ async function geocode(query) {
 }
 
 let workerMarker = null;
+let workerLatLng = null;
 
 async function geocodeWorker() {
   const addr = document.getElementById('workerAddressInput').value.trim();
@@ -628,6 +628,7 @@ async function geocodeWorker() {
     });
     workerMarker = L.marker([lat,lng],{icon}).addTo(map);
     workerMarker.bindTooltip('就業者の自宅', {permanent:true, direction:'top', offset:[0,-20]});
+    workerLatLng = { lat, lng };
     map.setView([lat,lng], 10);
     document.getElementById('workerStatus').textContent = `✅ 表示中：${addr}`;
     showToast('自宅ピンを表示しました 🏠');
@@ -639,6 +640,7 @@ async function geocodeWorker() {
 
 function clearWorker() {
   if (workerMarker) { map.removeLayer(workerMarker); workerMarker = null; }
+  workerLatLng = null;
   document.getElementById('workerAddressInput').value = '';
   document.getElementById('workerStatus').textContent = '';
   showToast('自宅ピンを消しました');
@@ -852,11 +854,18 @@ function selectCompany(id) {
     ${stationsHtml}
     ${c.note?`<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${c.note}</span></div>`:''}
     ${(()=>{const sh=c.shifts||{};const arr=[];if(sh.day)arr.push('🌞日勤');if(sh.eve)arr.push('🌆夕勤');if(sh.night)arr.push('🌙夜勤');if(sh.short)arr.push('⏱短時間');return arr.length?`<div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-val">${arr.join('　')}</span></div>`:'';})()}`;
+  const dest = c.lat && c.lng ? `${c.lat},${c.lng}` : encodeURIComponent(c.address||c.name);
+  const origin = workerLatLng ? `&origin=${workerLatLng.lat},${workerLatLng.lng}` : '';
+  const gmapUrl = c.lat && c.lng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${dest}${origin}`
+    : `https://www.google.com/maps/search/?api=1&query=${dest}`;
   document.getElementById('detailActions').innerHTML = isAdmin
     ? `<button class="btn-primary" style="font-size:12px;padding:7px" onclick="openEditModal()">✏️ 編集</button>
        <button class="${c.hidden?'btn-primary':'btn-secondary'}" style="font-size:12px;padding:7px" onclick="toggleHidden(${c.id})">${c.hidden?'👁 再表示':'🙈 非表示'}</button>
+       <a href="${gmapUrl}" target="_blank" style="font-size:12px;padding:7px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;display:flex;align-items:center;gap:4px">🗺️ 経路</a>
        <button class="btn-secondary" style="font-size:12px;padding:7px" onclick="closeDetail()">✕</button>`
-    : `<button class="btn-secondary" style="font-size:12px;padding:7px;flex:1" onclick="closeDetail()">✕ 閉じる</button>`;
+    : `<a href="${gmapUrl}" target="_blank" style="font-size:12px;padding:7px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;display:flex;align-items:center;gap:4px">🗺️ Googleマップで経路を見る</a>
+       <button class="btn-secondary" style="font-size:12px;padding:7px" onclick="closeDetail()">✕ 閉じる</button>`;
 
   document.getElementById('detailPanel').style.display = 'block';
   Object.entries(markers).forEach(([mid,m]) => { const el=m.getElement(); if(el) el.style.transform=parseInt(mid)===id?'scale(1.2)':''; });
