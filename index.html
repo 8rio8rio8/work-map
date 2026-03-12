@@ -560,7 +560,7 @@ function initMap() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution:'© OpenStreetMap contributors', maxZoom:18, keepBuffer:4
   }).addTo(map);
-  map.on('click', () => { closeDetail(); deselectAll(); });
+  map.on('click', () => { closeDetail(); deselectAll(); render(); });
 }
 
 const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
@@ -875,10 +875,17 @@ function selectCompany(id) {
 function deselectAll() {
   selectedId = null;
   document.querySelectorAll('.company-card').forEach(el=>el.classList.remove('selected'));
-  Object.values(markers).forEach(m=>{const el=m.getElement();if(el)el.style.transform='';});
   Object.values(stationMarkers).forEach(arr => arr.forEach(m => m.setOpacity(0)));
   Object.values(lines).forEach(arr => arr.forEach(l => l.setStyle({opacity:0})));
-  setTimeout(() => map.invalidateSize(), 50);
+  Object.values(markers).forEach(m => {
+    const el = m.getElement();
+    if (el) {
+      el.style.transform = '';
+      el.style.display = '';
+      el.style.visibility = 'visible';
+      el.style.opacity = '1';
+    }
+  });
 }
 function closeDetail() { document.getElementById('detailPanel').style.display='none'; deselectAll(); }
 
