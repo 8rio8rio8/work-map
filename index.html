@@ -628,6 +628,7 @@ async function geocodeWorker() {
     });
     workerMarker = L.marker([lat,lng],{icon}).addTo(map);
     workerMarker.bindTooltip('就業者の自宅', {permanent:true, direction:'top', offset:[0,-20]});
+    workerMarker.on('click', () => map.flyTo([lat,lng], 12, {duration:0.7}));
     workerLatLng = { lat, lng };
     map.setView([lat,lng], 10);
     document.getElementById('workerStatus').textContent = `✅ 表示中：${addr}`;
@@ -877,6 +878,7 @@ function deselectAll() {
   Object.values(markers).forEach(m=>{const el=m.getElement();if(el)el.style.transform='';});
   Object.values(stationMarkers).forEach(arr => arr.forEach(m => m.setOpacity(0)));
   Object.values(lines).forEach(arr => arr.forEach(l => l.setStyle({opacity:0})));
+  setTimeout(() => map.invalidateSize(), 50);
 }
 function closeDetail() { document.getElementById('detailPanel').style.display='none'; deselectAll(); }
 
