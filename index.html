@@ -210,7 +210,7 @@
           </div>
         </div>
         <div class="filter-section">
-          <div class="filter-section-label">移動手段で絞り込み</div>
+          <div class="filter-section-label">交通手段で絞り込み</div>
           <div class="filter-row" id="transportFilterRow">
             <button class="filter-btn active" onclick="toggleTransportFilter('all',this)">すべて</button>
             <button class="filter-btn" onclick="toggleTransportFilter('徒歩',this)">🚶 徒歩</button>
@@ -628,7 +628,7 @@ async function geocodeWorker() {
     });
     workerMarker = L.marker([lat,lng],{icon}).addTo(map);
     workerMarker.bindTooltip('就業者の自宅', {permanent:true, direction:'top', offset:[0,-20]});
-    workerMarker.on('click', () => map.flyTo([lat,lng], 12, {duration:0.7}));
+    workerMarker.on('click', () => map.flyTo([lat,lng], 13, {duration:0.7}));
     workerLatLng = { lat, lng };
     map.setView([lat,lng], 10);
     document.getElementById('workerStatus').textContent = `✅ 表示中：${addr}`;
