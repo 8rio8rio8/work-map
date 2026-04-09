@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ&libraries=geocoding&language=ja&region=JP"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYggQ57QinM4_xEHY91UI0SMozuCtdC2s&libraries=geocoding&language=ja&region=JP"></script>
 <style>
   :root {
     --bg:#f0f2f7; --surface:#ffffff; --surface2:#f5f7fb;
@@ -561,6 +561,15 @@ function initMap() {
     attribution:'© OpenStreetMap contributors', maxZoom:18, keepBuffer:4
   }).addTo(map);
   map.on('click', () => { closeDetail(); deselectAll(); render(); });
+  const zoomIndicator = L.control({position: 'bottomright'});
+  zoomIndicator.onAdd = function() {
+    const div = L.DomUtil.create('div');
+    div.style.cssText = 'background:rgba(0,0,0,0.4);color:#fff;font-size:11px;padding:3px 7px;border-radius:10px;font-family:monospace;pointer-events:none;';
+    div.textContent = 'zoom: ' + map.getZoom();
+    map.on('zoomend', () => { div.textContent = 'zoom: ' + map.getZoom(); });
+    return div;
+  };
+  zoomIndicator.addTo(map);
 }
 
 const GOOGLE_API_KEY = 'AIzaSyBRhcu-cK7Hqr2S-cderzx3MvtUgGESCxQ';
