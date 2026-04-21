@@ -561,8 +561,8 @@ function initMap() {
   const standardLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution:'© OpenStreetMap contributors', maxZoom:18, keepBuffer:4
   });
-  const transitLayer = L.tileLayer('https://tile.memomaps.de/tilegen/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap contributors, © ÖPNVKarte', maxZoom:18, keepBuffer:4
+  const transitLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+    attribution:'© OpenRailwayMap contributors', maxZoom:18, keepBuffer:4, opacity:0.8
   });
 
   standardLayer.addTo(map);
@@ -577,13 +577,11 @@ function initMap() {
       L.DomEvent.stopPropagation(e);
       isTransit = !isTransit;
       if (isTransit) {
-        map.removeLayer(standardLayer);
         transitLayer.addTo(map);
         btn.style.background = 'rgba(79,142,247,0.85)';
-        btn.textContent = '🗺️ 標準';
+        btn.textContent = '🚃 路線図ON';
       } else {
         map.removeLayer(transitLayer);
-        standardLayer.addTo(map);
         btn.style.background = 'rgba(30,30,40,0.85)';
         btn.textContent = '🚃 路線図';
       }
